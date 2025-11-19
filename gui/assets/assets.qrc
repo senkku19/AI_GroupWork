@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="robot_mascot">
+    <file>robot_mascot.PNG</file>
+  </qresource>
+</RCC>
