@@ -1,12 +1,26 @@
 from LLMModel import LLMModel
+import os
 
-# Asetukset
-EMAIL_ASSISTANT_DIR = "./email_assistant"
+# ----------------------
+# KONFIGURAATIO
+# ----------------------
+# HUOM: Varmista, että tämä polku on sama, jossa alkuperäinen mallisi sijaitsee.
+# Ensimmäisessä viestissäsi se oli "./local_openllama"
+BASE_MODEL_DIR = "./local_openllama" 
 
-# 1. Ladataan malli
-model = LLMModel(EMAIL_ASSISTANT_DIR)
+# Tarkistetaan että polku on olemassa
+if not os.path.exists(BASE_MODEL_DIR):
+    print(f"VIRHE: Polkua {BASE_MODEL_DIR} ei löydy!")
+    print("Varmista, että BASE_MODEL_DIR osoittaa kansioon, jossa OpenLLaMA-mallisi on.")
+    exit()
 
-# 2. Testidata erillisinä muuttujina
+print(f"🚀 Ladataan BASEMALLIA (ei hienosäätöä) polusta: {BASE_MODEL_DIR}")
+
+# 1. Ladataan perusmalli
+# LLMModel osaa käsitellä tilanteen, jossa adaptereita ei löydy -> se käyttää raakamallia.
+model = LLMModel(BASE_MODEL_DIR)
+
+# 2. Testidata (Sama kuin aiemmin)
 sender = "rekrytointi@postipate.fi"
 subject = "Tarjouspyyntö uudesta projektista"
 body = """Moro!
@@ -21,13 +35,12 @@ Ystävällisin terveisin,
 Matti Meikäläinen"""
 
 print("\n" + "="*40)
-print(f"📧 TESTATAAN SÄHKÖPOSTIA:\nLähettäjä: {sender}\nAihe: {subject}\n")
+print(f"📧 TESTATAAN BASEMALLIA SÄHKÖPOSTILLA:\nLähettäjä: {sender}\nAihe: {subject}\n")
 print("="*40)
 
-# 3. Kutsutaan funktioita uudella rajapinnalla
+# 3. Ajetaan samat testit
 
 print("🔹 LUOKITTELU (Kategoria):")
-# Nyt välitetään parametrit erikseen
 category = model.classifyWork(sender, subject, body)
 print(f"   -> {category}")
 
