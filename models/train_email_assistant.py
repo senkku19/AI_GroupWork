@@ -125,7 +125,7 @@ trainer = Trainer(
 # Training loop with tqdm
 # ----------------------
 print("🔹 Starting training...")
-trainer.train()
+trainer.train("email_assistant/checkpoint-513")
 
 # ----------------------
 # Save model + metrics
