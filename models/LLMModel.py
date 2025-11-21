@@ -35,17 +35,17 @@ class LLMModel:
         Rakentaa opetusdataa vastaavan rakenteen erillisistä kentistä.
         """
         # Käytetään oletusarvoja, jos kentät ovat tyhjiä
-        sender = sender if sender else "Tuntematon"
-        subject = subject if subject else "Ei aihetta"
+        sender = sender if sender else "Unknowns"
+        subject = subject if subject else "No subject"
         body = body if body else ""
 
         # Rakenne vastaa tarkasti make_prompt -funktiota koulutuksessa
-        prompt = f"""Sähköposti:
-Lähettäjä: {sender}
-Aihe: {subject}
-Viesti: {body}
+        prompt = f"""Email:
+Sender: {sender}
+Subject: {subject}
+Body: {body}
 
-Tehtävä:
+Task:
 - {target_field}:"""
         return prompt
 
@@ -75,19 +75,19 @@ Tehtävä:
     # --- PUBLIC INTERFACE ---
 
     def classifyWork(self, sender, subject, body):
-        prompt = self._format_email_prompt(sender, subject, body, "Kategoria")
+        prompt = self._format_email_prompt(sender, subject, body, "Category")
         return self._generate(prompt, max_new_tokens=10, stop_at_newline=True)
 
     def classifyUrgency(self, sender, subject, body):
-        prompt = self._format_email_prompt(sender, subject, body, "Kiireellisyys")
+        prompt = self._format_email_prompt(sender, subject, body, "Urgency")
         return self._generate(prompt, max_new_tokens=10, stop_at_newline=True)
 
     def createSummary(self, sender, subject, body):
-        prompt = self._format_email_prompt(sender, subject, body, "Tiivistelmä")
+        prompt = self._format_email_prompt(sender, subject, body, "Summary")
         return self._generate(prompt, max_new_tokens=150, stop_at_newline=True)
 
     def createAnswer(self, positiveAnswer, sender, subject, body):
-        field = "Myönteinen vastaus" if positiveAnswer else "Kielteinen vastaus"
+        field = "Positive reply" if positiveAnswer else "Negative reply"
         prompt = self._format_email_prompt(sender, subject, body, field)
         
         raw_answer = self._generate(prompt, max_new_tokens=200, stop_at_newline=False)

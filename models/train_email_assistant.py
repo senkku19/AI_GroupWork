@@ -6,14 +6,12 @@ from datasets import Dataset
 from peft import LoraConfig, get_peft_model, TaskType
 from tqdm import tqdm
 
-# ----------------------
-# CONFIG
-# ----------------------
+# Configurations
 BASE_MODEL_DIR = "./local_openllama"
 OUTPUT_DIR = "./email_assistant"
 
-TRAIN_CSV = "AI_GroupWork/data/emails_train.csv"
-VAL_CSV = "AI_GroupWork/data/emails_val.csv"
+TRAIN_CSV = "AI_GroupWork/data/emails_english.csv"
+VAL_CSV = "AI_GroupWork/data/emails_english_val.csv"
 
 MAX_LENGTH = 512
 BATCH_SIZE = 2
@@ -23,10 +21,8 @@ LEARNING_RATE = 2e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
 
-# ----------------------
 # Load base model/tokenizer
-# ----------------------
-print("🔹 Loading Finnish base model...")
+print("Loading English base model...")
 tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_DIR, use_fast=False)
 quant_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16, bnb_4bit_use_double_quant=True)
 
@@ -36,23 +32,24 @@ base_model = AutoModelForCausalLM.from_pretrained(
     device_map="auto"
 )
 
-# ----------------------
-# Prepare datasets
-# ----------------------
+# CSV-format: sender,subject,body,category,urgency,summary,positive_reply,negative_reply
+# Here we prepare a prompt that includes all tasks in one text input
+# Model is queried at test and actual use time with same prompt format and by that it produces correctly formatted output
+# Prepare datasets:
 def load_csv_dataset(path):
     df = pd.read_csv(path)
     def make_prompt(row):
-        return f"""Sähköposti:
-Lähettäjä: {row['sender']}
-Aihe: {row['subject']}
-Viesti: {row['body']}
+        return f"""Email:
+Sender: {row['sender']}
+Subject: {row['subject']}
+Body: {row['body']}
 
-Tehtävä:
-- Kategoria: {row['category']}
-- Kiireellisyys: {row['urgency']}
-- Tiivistelmä: {row['summary']}
-- Myönteinen vastaus: {row['positive_reply']}
-- Kielteinen vastaus: {row['negative_reply']}
+Task:
+- Category: {row['category']}
+- Urgency: {row['urgency']}
+- Summary: {row['summary']}
+- Positive reply: {row['positive_reply']}
+- Negative reply: {row['negative_reply']}
 """
     df["text"] = df.apply(make_prompt, axis=1)
     return Dataset.from_pandas(df[["text"]])
@@ -68,9 +65,11 @@ def tokenize(batch):
 train_dataset = train_dataset.map(tokenize, batched=True)
 val_dataset = val_dataset.map(tokenize, batched=True)
 
-# ----------------------
-# LoRA config
-# ----------------------
+# LoRA fine-tuning
+# LoRA is a parameter-efficient fine-tuning method that adds small trainable matrices to end layers of the model
+# and only these added weights are updated during training, keeping the rest of the model frozen.
+# That makes the fine-tuning feasible of large models even with limited hardware resources.
+# LoRA config:
 lora_config = LoraConfig(
     r=8, lora_alpha=32,
     target_modules=["q_proj","v_proj"],
@@ -82,9 +81,7 @@ lora_config = LoraConfig(
 model = get_peft_model(base_model, lora_config)
 model.to(device)
 
-# ----------------------
-# Callback for metrics
-# ----------------------
+# Callback to log metrics for loss
 class MetricsCallback(TrainerCallback):
     def __init__(self):
         self.logs = []
@@ -97,9 +94,10 @@ class MetricsCallback(TrainerCallback):
 
 callback = MetricsCallback()
 
-# ----------------------
 # TrainingArguments & Trainer
-# ----------------------
+# Note for future use: Change save_strategy to "steps" and set save_steps to desired value to save more frequently...
+# Also save the metrics at each save point as it is really not that great to lose all intermediate results if something goes wrong at the end...
+# Configure training parameters:
 training_args = TrainingArguments(
     per_device_train_batch_size=BATCH_SIZE,
     per_device_eval_batch_size=BATCH_SIZE,
@@ -121,15 +119,13 @@ trainer = Trainer(
     callbacks=[callback]
 )
 
-# ----------------------
-# Training loop with tqdm
-# ----------------------
+# Training loop
 print("🔹 Starting training...")
-trainer.train("email_assistant/checkpoint-513")
+exit(0) # COMMENT OUT TO ENABLE TRAINING! This is here only to prevent accidental training runs!
+# trainer.train("email_assistant/checkpoint-513")
+trainer.train()
 
-# ----------------------
-# Save model + metrics
-# ----------------------
+# Save model and metrics
 model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 

@@ -1,43 +1,42 @@
 from LLMModel import LLMModel
 
-# Asetukset
+# Config
 EMAIL_ASSISTANT_DIR = "./email_assistant"
 
-# 1. Ladataan malli
+BASE_MODEL_DIR = "./local_openllama" 
+
+# 1. Load model, change between email assistant and base model here by commenting
 model = LLMModel(EMAIL_ASSISTANT_DIR)
+#model = LLMModel(BASE_MODEL_DIR)  # Voit testata myös pelkällä basemallilla
 
-# 2. Testidata erillisinä muuttujina
-sender = "rekrytointi@postipate.fi"
-subject = "Tarjouspyyntö uudesta projektista"
-body = """Moro!
-Kiitos hyvästä työpajasta viime viikolla! 
-Keskustelimme alustavasti uudesta projektista, ja haluaisin pyytää teiltä tarjouksen seuraavista palveluista:
-- Verkkosivuston suunnittelu ja kehitys
-- Sisällöntuotanto ja käännökset
-- Hakukoneoptimointi (SEO)
-Toivoisimme vastausta ensi viikkoon mennessä, jotta ehdimme aikatauluun.
+# 2. Test email. This is the same format that was used in teaching!
+sender = "jane@post.fi"
+subject = "Service proposal"
+body = """Hi!
 
-Ystävällisin terveisin,
+I hope this message finds you well. I am reaching out to propose a new service that I believe could greatly benefit your company.
+
+Best Regards,
 Matti Meikäläinen"""
 
 print("\n" + "="*40)
 print(f"📧 TESTATAAN SÄHKÖPOSTIA:\nLähettäjä: {sender}\nAihe: {subject}\n")
 print("="*40)
 
-# 3. Kutsutaan funktioita uudella rajapinnalla
+# 3. Run tasks by calling model methods
 
 print("🔹 LUOKITTELU (Kategoria):")
-# Nyt välitetään parametrit erikseen
+
 category = model.classifyWork(sender, subject, body)
-print(f"   -> {category}")
+print(f"{category}")
 
 print("\n🔹 KIIREELLISYYS:")
 urgency = model.classifyUrgency(sender, subject, body)
-print(f"   -> {urgency}")
+print(f"{urgency}")
 
 print("\n🔹 TIIVISTELMÄ:")
 summary = model.createSummary(sender, subject, body)
-print(f"   -> {summary}")
+print(f"{summary}")
 
 print("\n🔹 VASTAUSEHDOTUS (Myönteinen):")
 pos_reply = model.createAnswer(True, sender, subject, body)
