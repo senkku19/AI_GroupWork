@@ -21,7 +21,7 @@ class OutlookReader:
                     "from": msg.SenderName,
                     "received": msg.ReceivedTime,
                     "read": not msg.UnRead,
-                    "body_preview": (msg.Body or "").replace("\r", " ").replace("\n", " ")
+                    "body": (msg.Body or "").replace("\r", " ").replace("\n", " ")
                 }
                 results.append(email_data)
 
