@@ -1,34 +1,41 @@
 import win32com.client
 from datetime import datetime
 
-def read_last_20_emails():
-    outlook = win32com.client.Dispatch("Outlook.Application")
-    namespace = outlook.GetNamespace("MAPI")
-    inbox = namespace.GetDefaultFolder(6)  # 6 = Inbox
+class OutlookReader:
+    def __init__(self):
+        self.outlook = win32com.client.Dispatch("Outlook.Application")
+        self.namespace = self.outlook.GetNamespace("MAPI")
+        self.inbox = self.namespace.GetDefaultFolder(6)  # 6 = Inbox
 
-    messages = inbox.Items
-    messages.Sort("[ReceivedTime]", True)  # newest first
+    def get_last_10_emails(self):
+        messages = self.inbox.Items
+        messages.Sort("[ReceivedTime]", True)  # newest first
 
-    print("Last 20 Emails" + "="*80)
+        results = []
+        count = 0
 
-    count = 0
-    for msg in messages:
-        try:
-            print(f"Subject: {msg.Subject}")
-            print(f"From: {msg.SenderName}")
-            print(f"Received: {msg.ReceivedTime.strftime('%Y-%m-%d %H:%M:%S')}")
-            print(f"Read: {'No' if msg.UnRead else 'Yes'}")
-            body = (msg.Body or "").replace("\r", " ").replace("\n", " ")
-            print(f"Body Preview: {body}")
-            print("-"*80)
-            count += 1
-            if count >= 20:
-                break
-        except Exception as e:
-            print(f" Skipped item (error: {e})")
-            continue
+        for msg in messages:
+            try:
+                email_data = {
+                    "subject": msg.Subject,
+                    "from": msg.SenderName,
+                    "received": msg.ReceivedTime,
+                    "read": not msg.UnRead,
+                    "body_preview": (msg.Body or "").replace("\r", " ").replace("\n", " ")
+                }
+                results.append(email_data)
 
-    print(f"\n Done — displayed {count} messages.\n")
+                count += 1
+                if count >= 10:
+                    break
+
+            except Exception:
+                continue
+
+        return results
+
 
 if __name__ == "__main__":
-    read_last_20_emails()
+    reader = OutlookReader()
+    data = reader.get_last_10_emails()
+    print(data)
