@@ -29,7 +29,7 @@ class MainWindow(QtWidgets.QDialog):
 
 
     def get_emails(self):
-        print("Get Emails button clicked")
+        self.ui.robotReplica.setText("Fetching and classifying emails...")
         emails = self.outlook_reader.get_last_10_emails()
         """ for email in emails:
             email['category'] = self.llm_model.classifyWork(
@@ -38,8 +38,8 @@ class MainWindow(QtWidgets.QDialog):
             email['urgency'] = self.llm_model.classifyUrgency(
                 email['from'], email['subject'], email['body']
             ) """
-        print("Fetched and classified emails:", emails)
         self.populate_email_list(emails)
+        self.ui.robotReplica.setText("Please select an email...")
 
     def populate_email_list(self, emails):
         self.ui.emailList.clear()
