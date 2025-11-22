@@ -173,13 +173,13 @@ class Ui_Dialog(object):
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 395, 175))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.textBrowser = QtWidgets.QTextBrowser(self.scrollAreaWidgetContents)
-        self.textBrowser.setGeometry(QtCore.QRect(0, 0, 401, 181))
+        self.outputText = QtWidgets.QTextBrowser(self.scrollAreaWidgetContents)
+        self.outputText.setGeometry(QtCore.QRect(0, 0, 401, 181))
         font = QtGui.QFont()
         font.setFamily("Terminal")
         font.setPointSize(9)
-        self.textBrowser.setFont(font)
-        self.textBrowser.setObjectName("textBrowser")
+        self.outputText.setFont(font)
+        self.outputText.setObjectName("outputText")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.label_4 = QtWidgets.QLabel(self.widget)
         self.label_4.setGeometry(QtCore.QRect(480, 490, 291, 20))
@@ -206,16 +206,5 @@ class Ui_Dialog(object):
         __sortingEnabled = self.emailList.isSortingEnabled()
         self.emailList.setSortingEnabled(False)
         self.emailList.setSortingEnabled(__sortingEnabled)
-        self.textBrowser.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Terminal\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt;\">Assist says, that:</span></p>\n"
-"<p style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt;\">cpp</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt;\">void QTableWidget::setCellWidget (int row, int column, QWidget * widget)  </span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'MS Shell Dlg 2\'; font-size:8pt;\"><br /></p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt;\">Sets the given widget to be displayed in the cell in the given row and column, passing the ownership of the widget to the table. If cell widget A is replaced with cell widget B, cell widget A will be deleted.</span></p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt;\">And there is analogs to this method in the most of QAbstractItemView descendants.</span></p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt;\">You have to subclass Q***Delegate only when you want editor widget to appear in View only when you hit EditTrigger, then vanish and let delegate render the view item in some way.</span></p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt;\">If I correct, you wanted to see control in item view all the time and be able to hit controls without the need to enter editing mode and wait while delegate creates editor and set its state, so you do not need to make specific delegate, just set widget into the view\'s item.</span></p></body></html>"))
+        self.outputText.setHtml(_translate("Dialog", "No input received yet."))
         self.label_4.setText(_translate("Dialog", "OUTPUT:"))
