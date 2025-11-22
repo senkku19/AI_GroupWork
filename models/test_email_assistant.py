@@ -1,9 +1,11 @@
 from LLMModel import LLMModel
 
-# Config
-EMAIL_ASSISTANT_DIR = "./email_assistant"
+BASE_MODEL_DIR = "AI_GroupWork\models\local_openllama"
 
-BASE_MODEL_DIR = "./local_openllama" 
+#EMAIL_ASSISTANT_DIR = "email_assistant"
+EMAIL_ASSISTANT_DIR = "AI_GroupWork\models\email_assistant"
+# Config
+
 
 # 1. Load model, change between email assistant and base model here by commenting
 model = LLMModel(EMAIL_ASSISTANT_DIR)
