@@ -25,12 +25,14 @@ class OutlookReader:
 
         for msg in messages:
             try:
+                raw_body = (msg.Body or "").replace("\r", " ").replace("\n", " ")
+                body_limited = raw_body[-2048:]
                 email_data = {
                     "subject": str(msg.Subject),
                     "from": str(msg.SenderName),
                     "received": safe_datetime(msg.ReceivedTime),
                     "read": bool(not msg.UnRead),
-                    "body": (msg.Body or "").replace("\r", " ").replace("\n", " ")
+                    "body": body_limited
                 }
 
                 results.append(email_data)
