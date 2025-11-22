@@ -1,9 +1,9 @@
 from LLMModel import LLMModel
 
-BASE_MODEL_DIR = "AI_GroupWork\models\local_openllama"
+# EMAIL_ASSISTANT_DIR = "../AI_GroupWork/models/local_openllama"
 
 #EMAIL_ASSISTANT_DIR = "email_assistant"
-EMAIL_ASSISTANT_DIR = "AI_GroupWork\models\email_assistant"
+EMAIL_ASSISTANT_DIR = "../AI_GroupWork\models\email_assistant"
 # Config
 
 
