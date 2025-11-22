@@ -225,27 +225,7 @@ class MainWindow(QtWidgets.QDialog):
             self.ui.outputText.setHtml(summary)
             self.ui.robotReplica.setText("Summary generated.")
         except Exception as e:
-            self.ui.robotReplica.setText(f"Error generating summary: {str(e)}")
-
-
-class EmailWorker(QtCore.QObject):
-    finished = QtCore.pyqtSignal(list)
-
-    def __init__(self, emails, llm_model):
-        super().__init__()
-        self.emails = emails
-        self.llm_model = llm_model
-
-    def run(self):
-        for email in self.emails:
-            email['category'] = self.llm_model.classifyWork(
-                email['from'], email['subject'], email['body']
-            )
-            email['urgency'] = self.llm_model.classifyUrgency(
-                email['from'], email['subject'], email['body']
-            )
-        self.finished.emit(self.emails)
-      
+            self.ui.robotReplica.setText(f"Error generating summary: {str(e)}")      
                 
 
 if __name__ == "__main__":
