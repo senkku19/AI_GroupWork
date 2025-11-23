@@ -69,7 +69,7 @@ Task:
         
         if stop_at_newline:
             generated_text = generated_text.split('\n')[0].strip()
-            
+
         return generated_text
 
     # --- PUBLIC INTERFACE ---
@@ -80,7 +80,7 @@ Task:
 
     def classifyUrgency(self, sender, subject, body):
         prompt = self._format_email_prompt(sender, subject, body, "Urgency")
-        return self._generate(prompt, max_new_tokens=10, stop_at_newline=True)
+        return self._generate(prompt, max_new_tokens=2, stop_at_newline=True)
 
     def createSummary(self, sender, subject, body):
         prompt = self._format_email_prompt(sender, subject, body, "Summary")
@@ -91,7 +91,6 @@ Task:
         prompt = self._format_email_prompt(sender, subject, body, field)
         
         raw_answer = self._generate(prompt, max_new_tokens=200, stop_at_newline=False)
-        
         # Siivotaan, jos malli alkaa generoida seuraavaa kenttää
         if "\n-" in raw_answer:
             raw_answer = raw_answer.split("\n-")[0]
