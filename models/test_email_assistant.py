@@ -16,7 +16,7 @@ sender = "jane@post.fi"
 subject = "Service proposal"
 body = """Hi!
 
-I hope this message finds you well. I am reaching out to propose a new service that I believe could greatly benefit your company.
+I hope this message finds you. I am reaching out to benefit from your company.
 
 Best Regards,
 Matti Meikäläinen"""

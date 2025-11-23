@@ -1,17 +1,18 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from gui.app_layout import Ui_Dialog 
 from OutlookAPI.outlook_reader import OutlookReader
 from models.LLMModel import LLMModel
 import sys
-import concurrent.futures as concc
 
+# --- SÄILYTÄ TÄMÄ LUOKKA ENNALLAAN ---
 class EmailProcessor():
     def __init__(self):
+        # Huom: Varmista että polku on oikein suhteessa siihen mistä ajat koodin
         EMAIL_ASSISTANT_DIR = "../AI_GroupWork/models/email_assistant"
         self.llm_model = LLMModel(EMAIL_ASSISTANT_DIR)
 
-    def classify_email(self,emails):
+    def classify_email(self, emails):
         for email in emails:
             try:
                 email['category'] = self.llm_model.classifyWork(
@@ -26,7 +27,6 @@ class EmailProcessor():
                 )
             except Exception as e:
                 email['urgency'] = f"error: {str(e)}"
-
         return emails
 
     def summarize_email(self, email):
@@ -44,7 +44,26 @@ class EmailProcessor():
         )
         return reply
 
+# --- UUSI WORKER-LUOKKA ---
+# Tämä hoitaa luokittelun taustalla ilman että UI jäätyy
+class ClassificationWorker(QThread):
+    finished = pyqtSignal(list) # Signaali kun valmis, palauttaa listan
+    error = pyqtSignal(str)     # Signaali jos virhe
 
+    def __init__(self, processor, emails):
+        super().__init__()
+        self.processor = processor
+        self.emails = emails
+
+    def run(self):
+        try:
+            # Ajetaan raskas operaatio tässä säikeessä
+            classified_emails = self.processor.classify_email(self.emails)
+            self.finished.emit(classified_emails)
+        except Exception as e:
+            self.error.emit(str(e))
+
+# --- PÄIVITETTY MAINWINDOW ---
 class MainWindow(QtWidgets.QDialog):
     def __init__(self):
         super().__init__()
@@ -53,10 +72,13 @@ class MainWindow(QtWidgets.QDialog):
         self.selected_email = None
 
         self.outlook_reader = OutlookReader()
-        self.email_processor = EmailProcessor()
-        self.executor = concc.ProcessPoolExecutor(max_workers=1)
-        self.future = None
-        self.poll_timer = None
+        
+        # Ladataan malli heti alussa (kestää hetken, UI saattaa odottaa tässä)
+        # Jos haluat loading screenin jo tähän, myös tämä pitäisi siirtää säikeeseen.
+        self.email_processor = EmailProcessor() 
+        
+        # Poistettu ProcessPoolExecutor
+        self.worker = None 
 
         # Connect button to function
         self.ui.getEmailButton.clicked.connect(self.get_emails)
@@ -67,10 +89,8 @@ class MainWindow(QtWidgets.QDialog):
         self.ui.negativeButton.clicked.connect(self.answer_negative)
         self.ui.summarizeEmail.clicked.connect(self.summarize_email)
 
-
-
     def get_emails(self):
-        self.ui.robotReplica.setText("Fetching and classifying emails...")
+        self.ui.robotReplica.setText("Fetching emails...")
         self.ui.selectEmailButton.setEnabled(False)
         self.ui.getEmailButton.setEnabled(False)
 
@@ -78,37 +98,31 @@ class MainWindow(QtWidgets.QDialog):
             emails = self.outlook_reader.get_last_10_emails()
         except Exception as e:
             self.ui.robotReplica.setText(f"Error fetching emails: {str(e)}")
+            self.ui.getEmailButton.setEnabled(True)
             return
     
         if not emails:
             self.ui.robotReplica.setText("No emails found.")
+            self.ui.getEmailButton.setEnabled(True)
             return
 
         self.ui.robotReplica.setText("Classifying emails, please wait...")
 
-        self.future = self.executor.submit(self.email_processor.classify_email, emails)
-        if self.poll_timer is None:
-            self.poll_timer = QtCore.QTimer(self)
-            self.poll_timer.setInterval(200)
-            self.poll_timer.timeout.connect(self.check_future)
-
-        self.poll_timer.start()
+        # Käynnistetään QThread
+        self.worker = ClassificationWorker(self.email_processor, emails)
+        self.worker.finished.connect(self.on_classification_finished)
+        self.worker.error.connect(self.on_classification_error)
+        self.worker.start() # Tämä käynnistää run() metodin taustalla
     
-    def check_future(self):
-        if self.future is None:
-            return
-        
-        if self.future.done():
-            try:
-                classified_emails = self.future.result()
-            except Exception as e:
-                self.ui.robotReplica.setText(f"Error classifying emails: {str(e)}")
-                print(f"Error in future: {str(e)}")
-                return
-            
-            self.populate_email_list_and_update_ui(classified_emails)
-            self.future = None
+    # Nämä korvaavat check_future-metodin
+    def on_classification_finished(self, classified_emails):
+        self.populate_email_list_and_update_ui(classified_emails)
+        self.worker = None # Siivotaan worker
 
+    def on_classification_error(self, error_msg):
+        self.ui.robotReplica.setText(f"Error classifying: {error_msg}")
+        self.ui.getEmailButton.setEnabled(True)
+        self.worker = None
 
     def populate_email_list(self, emails):
         self.ui.emailList.clear()
@@ -116,7 +130,7 @@ class MainWindow(QtWidgets.QDialog):
             item_text = f"Subject: {email['subject']} | Category: {email.get('category', 'N/A')} | Urgency: {email.get('urgency', 'N/A')}"
             item = QtWidgets.QListWidgetItem(item_text)
             font = QtGui.QFont()
-            font.setFamily("Terminal")
+            font.setFamily("Terminal") # Tai mikä fontti sinulla onkaan
             font.setPointSize(9)
             item.setFont(font)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsSelectable)
@@ -135,6 +149,7 @@ class MainWindow(QtWidgets.QDialog):
         self.populate_email_list(emails)
         self.ui.robotReplica.setText("Please select an email...")
 
+    # ... Loput metodit (ensure_onlyone_checked, select_email, jne.) pysyvät samoina ...
     def ensure_onlyone_checked(self, item):
         if item.checkState() == Qt.Checked:
             for email in range(self.ui.emailList.count()):
@@ -183,7 +198,11 @@ class MainWindow(QtWidgets.QDialog):
         self.ui.summarizeEmail.setEnabled(True)
         self.ui.summarizeEmail.show()   
 
+        # Huom: Myös vastausten generointi voi jäädyttää UI:n. 
+        # Voit tehdä niillekin samanlaisen Worker-luokan jos haluat.
         try:
+            # Qt:ssa UI päivittyy vasta kun funktio loppuu, ellei käytä processEvents
+            QtWidgets.QApplication.processEvents() 
             reply = self.email_processor.create_reply(self.selected_email, True)
             self.ui.outputText.setHtml(reply)
             self.ui.robotReplica.setText("Positive reply generated.")
@@ -192,7 +211,6 @@ class MainWindow(QtWidgets.QDialog):
 
 
     def answer_negative(self):
-
         if self.selected_email is None:
             self.ui.robotReplica.setText("No email selected to reply to.")
             return
@@ -208,6 +226,7 @@ class MainWindow(QtWidgets.QDialog):
         self.ui.summarizeEmail.show()
 
         try:
+            QtWidgets.QApplication.processEvents()
             reply = self.email_processor.create_reply(self.selected_email, False)
             self.ui.outputText.setHtml(reply)
             self.ui.robotReplica.setText("Negative reply generated.")
@@ -221,17 +240,16 @@ class MainWindow(QtWidgets.QDialog):
         
         self.ui.robotReplica.setText("Generating summary...")
         try:
+            QtWidgets.QApplication.processEvents()
             summary = self.email_processor.summarize_email(self.selected_email)
             self.ui.outputText.setHtml(summary)
             self.ui.robotReplica.setText("Summary generated.")
         except Exception as e:
-            self.ui.robotReplica.setText(f"Error generating summary: {str(e)}")      
+            self.ui.robotReplica.setText(f"Error generating summary: {str(e)}")              
                 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-
     window = MainWindow()
     window.show()
-
     sys.exit(app.exec_())
