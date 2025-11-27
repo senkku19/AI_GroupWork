@@ -9,6 +9,7 @@ import sys
 class EmailProcessor():
     def __init__(self):
         EMAIL_ASSISTANT_DIR = "../AI_GroupWork/models/email_assistant"
+        #EMAIL_ASSISTANT_DIR = "../AI_GroupWork/models/local_openllama"  # For testing with base model
         self.llm_model = LLMModel(EMAIL_ASSISTANT_DIR)
 
     def classify_email(self, emails):
