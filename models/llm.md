@@ -21,3 +21,9 @@ pip install SentencePiece
 # others
 
 pip install tqdm pandas matplotlib
+
+## classifying_test:
+
+pip install scikit-learn
+pip install matplotlib
+pip install seaborn
