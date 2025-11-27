@@ -206,5 +206,5 @@ class Ui_Dialog(object):
         __sortingEnabled = self.emailList.isSortingEnabled()
         self.emailList.setSortingEnabled(False)
         self.emailList.setSortingEnabled(__sortingEnabled)
-        self.outputText.setHtml(_translate("Dialog", "No input received yet."))
+        self.outputText.setHtml(_translate("Dialog", "No output received yet."))
         self.label_4.setText(_translate("Dialog", "OUTPUT:"))
