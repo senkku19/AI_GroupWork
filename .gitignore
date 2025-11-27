@@ -1,2 +1,3 @@
-local_openllama/
+local_openllama/ 
 __pycache__/
+*.py[cod]
