@@ -122,7 +122,7 @@ trainer = Trainer(
 # Training loop
 print("🔹 Starting training...")
 exit(0) # COMMENT OUT TO ENABLE TRAINING! This is here only to prevent accidental training runs!
-# trainer.train("email_assistant/checkpoint-513")
+# trainer.train("email_assistant/checkpoint-513") # Example to resume from checkpoint
 trainer.train()
 
 # Save model and metrics
@@ -131,5 +131,5 @@ tokenizer.save_pretrained(OUTPUT_DIR)
 
 pd.DataFrame(callback.logs).to_csv(os.path.join(OUTPUT_DIR, "metrics.csv"), index=False)
 
-print("✅ Email assistant saved to", OUTPUT_DIR)
-print("📊 Metrics saved to metrics.csv")
+print("Email assistant saved to", OUTPUT_DIR)
+print("Metrics saved to metrics.csv")

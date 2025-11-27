@@ -1,6 +1,5 @@
 # download_openllama.py
-# This is not actually tested yet! Kokeiltava vielä myöhemmin, muokattu aiemmasta skriptistä joka myös opetti mallia. Pyritty vaihtamaan pelkästään lataukseen
-
+# Downloads the OpenLLaMA 3B v2 model with 4-bit quantization and saves it locally.
 import os
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -12,18 +11,14 @@ MODEL_LOCAL_DIR = "./local_openllama"
 
 max_memory = {0: "7GB", "cpu": "30GB"} # Change to your device, this works with 8GB VRAM GPU
 
-# ------------------------------------
-# QUANTIZATION (4-bit)
-# ------------------------------------
+# Quantization (4-bit)
 quant_config = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_compute_dtype=torch.float16,
     bnb_4bit_use_double_quant=True
 )
 
-# ------------------------------------
-# DOWNLOAD MODEL (if needed)
-# ------------------------------------
+# Download model if not exists
 if os.path.exists(MODEL_LOCAL_DIR):
     print("Local model already exists.")
 else:

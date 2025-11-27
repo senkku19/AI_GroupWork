@@ -13,7 +13,7 @@ class LLMModel:
 
         print(f"🔹 Loading base model & LoRA adapters on {self.device}...")
         
-        # Ladataan perusmalli
+        # Loads mode.
         self.model = AutoModelForCausalLM.from_pretrained(
             model_path,
             device_map="auto",
@@ -21,7 +21,7 @@ class LLMModel:
             low_cpu_mem_usage=True
         )
         
-        # Ladataan LoRA-adapterit
+        # Loads LoRA adapters
         try:
             self.model = PeftModel.from_pretrained(self.model, model_path)
         except:
@@ -34,12 +34,12 @@ class LLMModel:
         """
         Rakentaa opetusdataa vastaavan rakenteen erillisistä kentistä.
         """
-        # Käytetään oletusarvoja, jos kentät ovat tyhjiä
+        # Defaults if missing
         sender = sender if sender else "Unknowns"
         subject = subject if subject else "No subject"
         body = body if body else ""
 
-        # Rakenne vastaa tarkasti make_prompt -funktiota koulutuksessa
+        # Stuctutred make_prompt -style function
         prompt = f"""Email:
 Sender: {sender}
 Subject: {subject}
@@ -57,7 +57,7 @@ Task:
                 **inputs,
                 max_new_tokens=max_new_tokens,
                 do_sample=True,
-                temperature=0.1,
+                temperature=0.1, # Tune temperature for creativity (lower = more deterministic)
                 top_p=0.9,
                 eos_token_id=self.tokenizer.eos_token_id,
                 pad_token_id=self.tokenizer.eos_token_id,
@@ -72,7 +72,7 @@ Task:
 
         return generated_text
 
-    # --- PUBLIC INTERFACE ---
+    # Interface methods
 
     def classifyWork(self, sender, subject, body):
         prompt = self._format_email_prompt(sender, subject, body, "Category")
@@ -91,7 +91,7 @@ Task:
         prompt = self._format_email_prompt(sender, subject, body, field)
         
         raw_answer = self._generate(prompt, max_new_tokens=200, stop_at_newline=False)
-        # Siivotaan, jos malli alkaa generoida seuraavaa kenttää
+        # Trim answer at first line
         if "\n-" in raw_answer:
             raw_answer = raw_answer.split("\n-")[0]
             

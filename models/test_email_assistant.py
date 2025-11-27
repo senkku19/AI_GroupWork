@@ -27,23 +27,23 @@ print("="*40)
 
 # 3. Run tasks by calling model methods
 
-print("🔹 LUOKITTELU (Kategoria):")
+print("🔹 Classify (category):")
 
 category = model.classifyWork(sender, subject, body)
 print(f"{category}")
 
-print("\n🔹 KIIREELLISYYS:")
+print("\n🔹 Classify (urgency):")
 urgency = model.classifyUrgency(sender, subject, body)
 print(f"{urgency}")
 
-print("\n🔹 TIIVISTELMÄ:")
+print("\n🔹 Summary::")
 summary = model.createSummary(sender, subject, body)
 print(f"{summary}")
 
-print("\n🔹 VASTAUSEHDOTUS (Myönteinen):")
+print("\n🔹 Reply (positive):")
 pos_reply = model.createAnswer(True, sender, subject, body)
 print(f"{pos_reply}")
 
-print("\n🔹 VASTAUSEHDOTUS (Kielteinen):")
+print("\n🔹 Reply (negative):")
 neg_reply = model.createAnswer(False, sender, subject, body)
 print(f"{neg_reply}")
