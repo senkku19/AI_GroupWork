@@ -119,4 +119,3 @@ pip install seaborn
 ## Contributors:
 
 - _Olli Hilke_ - [Oh-BugHit](https://github.com/OH-BugHit)
--
