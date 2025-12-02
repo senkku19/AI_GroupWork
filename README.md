@@ -119,3 +119,6 @@ pip install seaborn
 ## Contributors:
 
 - _Olli Hilke_ - [Oh-BugHit](https://github.com/OH-BugHit)
+- _Minna Nurminen_ - [nurminem](https://github.com/nurminem)
+- _Ville Kärkkänen_ -[Karkkanen](https://github.com/Karkkanen)
+- _Senja Moilanen_ -[senkku19](https://github.com/senkku19)
